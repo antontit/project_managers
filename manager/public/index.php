@@ -17,11 +17,10 @@ http_response_code(500);
 	$isDebug = (bool)getenv('APP_DEBUG');
 	$errorMiddleware = $app->addErrorMiddleware($isDebug, $isDebug, $isDebug);
 
-	$app->get('/', function (Request $request, Response $response) {
-		$payload = json_encode(['content' => 'hello world']);
+	$app->get('/[{param}]', function (Request $request, Response $response, array $args) {
+		$payload = json_encode(['content' => 'hello world', 'param' => $args['param']]);
 		$response->getBody()->write($payload);
-		return $response
-          ->withHeader('Content-Type', 'application/json');
+		return $response->withHeader('Content-Type', 'application/json');
 	});
 
 	$app->run();
