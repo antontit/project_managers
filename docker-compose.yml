@@ -25,4 +25,4 @@ services:
         environment:
             APP_DEBUG: 1
         volumes:
-            - ./manager:/app    
+            - ./manager:/app
