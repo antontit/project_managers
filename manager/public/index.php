@@ -1,27 +1,27 @@
 <?php
 
-use Slim\Factory\AppFactory;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use App\Kernel;
+use Symfony\Component\Debug\Debug;
+use Symfony\Component\HttpFoundation\Request;
 
-chdir(dirname(__DIR__));
-require 'vendor/autoload.php';
+require dirname(__DIR__).'/config/bootstrap.php';
 
-http_response_code(500);
+if ($_SERVER['APP_DEBUG']) {
+    umask(0000);
 
-(function () {
+    Debug::enable();
+}
 
-    $app = AppFactory::create();
-	$app->addRoutingMiddleware();
+if ($trustedProxies = $_SERVER['TRUSTED_PROXIES'] ?? $_ENV['TRUSTED_PROXIES'] ?? false) {
+    Request::setTrustedProxies(explode(',', $trustedProxies), Request::HEADER_X_FORWARDED_ALL ^ Request::HEADER_X_FORWARDED_HOST);
+}
 
-	$isDebug = (bool)getenv('APP_DEBUG');
-	$errorMiddleware = $app->addErrorMiddleware($isDebug, $isDebug, $isDebug);
+if ($trustedHosts = $_SERVER['TRUSTED_HOSTS'] ?? $_ENV['TRUSTED_HOSTS'] ?? false) {
+    Request::setTrustedHosts([$trustedHosts]);
+}
 
-	$app->get('/[{param}]', function (Request $request, Response $response, array $args) {
-		$payload = json_encode(['content' => 'hello world', 'param' => $args['param']]);
-		$response->getBody()->write($payload);
-		return $response->withHeader('Content-Type', 'application/json');
-	});
-
-	$app->run();
-})();
+$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+$request = Request::createFromGlobals();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);
