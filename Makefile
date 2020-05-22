@@ -19,9 +19,6 @@ docker-build:
 docker-down-clear:
 	docker-compose down -v --remove-orphans
 
-cli:
-	docker-compose run --rm manager-php-cli php bin/app.php
-
 manager-init: manager-composer-install
 
 manager-test: docker-compose run --rm manager-php-cli php bin/phpunit 
