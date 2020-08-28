@@ -25,6 +25,7 @@ services:
         volumes:
             - ./manager:/app
             - composer:/root/.composer/cache
+        tty: true
         depends_on:
             - manager-postgres
     manager-postgres:
